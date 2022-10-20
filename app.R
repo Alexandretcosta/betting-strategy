@@ -1,10 +1,12 @@
 library(shiny)
 library(packHV)
+library(plotly)
 setwd('C:\\Users\\Alexandre\\Documents\\github\\fibonacci_system')
 source('functions_article.R')
 
 
 # Define UI for random distribution app ----
+
 ui <- pageWithSidebar(
   
   # App title ----
@@ -57,20 +59,13 @@ ui <- pageWithSidebar(
                    
                    numericInput("mc1", "How many times do you want to repeat the simulation process?",
                                 min = 1, max = 10000, value = 10, step = 1)),
-  downloadButton('download','Download the Data')
+  downloadButton('download','Download the Data Results')
   
-  # br() element to introduce extra vertical spacing ----
-  #br(),
-  
-  # Input: Slider for the number of observations to generate ----
-  
-  
+
 ),
     
-    # Main panel for displaying outputs ----
     mainPanel(
-      
-      # Output: Tabset w/ plot, summary, and table ----
+
       tabsetPanel(type = "tabs",
                   tabPanel("Description",
                            h2("Objective:"),
@@ -92,10 +87,66 @@ ui <- pageWithSidebar(
                            p("Now, if you choose 'After % Profit', we have the following parameters:"),
                            p("- Profit %: Profit percentage based on your initial bet;"),
                            p("- Number repetion of process: If you wanna repeat process, you need put how many times you wanna repeat your simulation."),
-                           h2('Results:')
+                           h2('Results:'),
+                           p("About the results, we will have two analyses. One for 'After N Plays' and one for '% Profit'."),
+                           p("In both, we have the number of repetition of the process, that is, we want to calculate the average of the results (Profit and Number of Bets)."),
+                           p("For each situation we will have a different analysis.")
                         ),
-                  tabPanel("Analysis",h2("Results"),
-                           plotOutput("plot")),
+                  
+                  tabPanel("Analysis",
+                           
+                  conditionalPanel(
+                    condition = "input.crit == 'true'",
+                           
+                    h2("Analysis - After N Plays"),
+                           p(""),
+                           br(),
+                    h3('Earned Value'),
+                    br(),
+                      p("First, let's analyze the Earned Value that is decided by betting ", strong(textOutput("text",inline = T)),"times, i.e, the amount we win at the end of the game"),
+                      p("This variable is extremely important because it deals with how much money you will take home."),
+                      p("Below we have some statistics of this result and a graph with the distribution."),
+                    tableOutput("EarnedValue_describe1"),
+                    plotOutput("EarnedValue_plot1"),
+                           h3('Maximum Money Loss'),
+                           br(),
+                          p("In this topic we will analyze the maximum Loss that is decided by betting ", strong(textOutput("text1",inline = T)),"plays, i.e, how much do we have as a 'background' to play."),
+                          p("This variable can define the risk the person wants to take. What it means? It means that if you do not continue betting according to the strategy, you may have a loss based on this statistic, however, if you continue you will have to have this value as your emergency fund."),                          
+                  tableOutput("MaximumMoneyLoss_describe1"),
+                  plotOutput("MaximumMoneyLoss_plot1"),
+                          h3('Maximum Money Won'),
+                          br(),
+                          p("This stat is the opposite of Maximum Money Won, i.e, what would be the most you could win in your ", strong(textOutput("text2",inline = T))," moves."),
+                          p("If you put it as probability 0.5, on average the maximum loss is greater in modulus of the maximum gain."),
+                          tableOutput("MaximumMoneyWon_describe1"),
+                          plotOutput("MaximumMoneyWon_plot1"),
+                          h3('Maximum Bet'),
+                          br(),
+                          p("Finally, we have the statistic of the biggest amount you bet, that is, what was the biggest element of the Fibonacci sequence that we got in ", strong(textOutput("text3",inline = T))," moves."),
+                          p("This statistic will be mainly impacted by the number of losses in a row you have, since with each loss we move 1 space forward in the sequence. You can see that if your probability of winning increases, the lower the maximum value of the bet will be."),
+                          tableOutput("MaximumBet_describe1"),
+                          plotOutput("MaximumBet_plot1")),
+                                    
+                  conditionalPanel(
+                    condition = "input.crit == 'false'",
+                             h2("Analysis - After % Profit"),
+                             br(),
+                            h3('Number of Bets'),
+                            br(),
+                            p("First, let's analyze the maximum Loss that is decided by betting N times, that is, at a time within our betting strategy, made one by weight"),
+                            p("Thus, to succeed in the betting strategy, it is necessary to have an amount there is more for loss. This variable can define the risk the person wants to take."),
+                            p("Below we have some statistics of this result and a graph with the distribution."),
+                            tableOutput("NrBets_describe1"),
+                            plotOutput("NrBets_plot1"),
+                              h3('Maximum Money Loss'),
+                              br(),
+                              p("First, let's analyze the maximum Loss that is decided by betting N plays, i.e, at a time within our betting strategy, made one by weight"),
+                              p("Thus, to succeed in the betting strategy, it is necessary to have an amount there is more for loss. This variable can define the risk the person wants to take."),
+                              p("Below we have some statistics of this result and a graph with the distribution."),
+                              tableOutput("MaximumMoneyLoss_describe2"),
+                              plotOutput("MaximumMoneyLoss_plot2"))
+                  ),
+                  
                   tabPanel("Data of Results", dataTableOutput('dto'))
                                               
       )
@@ -108,9 +159,6 @@ ui <- pageWithSidebar(
 server <- function(input, output) {
   
  
-  # Reactive expression to generate the requested distribution ----
-  # This is called whenever the inputs change. The output functions
-  # defined below then use the value computed from this expression
   d <- reactive({
     teste_numerico2(nsteps = input$nsteps,
                              n_matriz = input$nsteps,
@@ -124,30 +172,95 @@ server <- function(input, output) {
                              spread = input$spread/100)
   })
   
-  # Generate a plot of the data ----
-  # Also uses the inputs to build the plot label. Note that the
-  # dependencies on the inputs and the data reactive expression are
-  # both tracked, and all expressions are called in the sequence
-  # implied by the dependency graph.
-  output$plot <- renderPlot({
-    h1("Results")
+
+  output$MaximumMoneyLoss_describe1 <- renderTable({
+    t(data.frame(unclass(summary(d()[['df']]$MaximumMoneyLoss)), 
+                 check.names = FALSE, stringsAsFactors = FALSE))
     
-    if("EarnedValue" %in% colnames(d()[['df']])){
-    #dist <- input$dist
-    #n <- input$n
-    
-      hist_boxplot(d()[['df']]$EarnedValue,
-         main = paste("After N plays", " (", input$nsteps, ")", sep = ""),
-         col = "#75AADB", border = "white",xlab ='Ganhos Totais')
-    }else{
-      hist_boxplot(d()[['df']]$NrBets,
-           main = paste("After % profit", " (", input$spread, ")", sep = ""),
-           col = "#75AADB", border = "white",xlab ='Number of Plays')
-      
-    }
   })
   
+  output$MaximumMoneyLoss_plot1 <- renderPlot({
+    h1("Results")
+      hist_boxplot(d()[['df']]$MaximumMoneyLoss,
+                   main = paste("Maximum Money Loss", " (", input$nsteps, ")", sep = ""),
+                   col = "#75AADB", border = "white",xlab ='Max Loss')
+  })
+  
+  output$MaximumMoneyWon_describe1 <- renderTable({
+    t(data.frame(unclass(summary(d()[['df']]$MaximumMoneyWon)), 
+                 check.names = FALSE, stringsAsFactors = FALSE))
+    
+  })
+  
+  output$MaximumMoneyWon_plot1 <- renderPlot({
+    h1("Results")
+    hist_boxplot(d()[['df']]$MaximumMoneyWon,
+                 main = paste("Maximum Money Won", " (", input$nsteps, ")", sep = ""),
+                 col = "#75AADB", border = "white",xlab ='Max Won')
+  })
+  
+  output$MaximumBet_describe1 <- renderTable({
+    t(data.frame(unclass(summary(d()[['df']]$MaximumBet)), 
+                 check.names = FALSE, stringsAsFactors = FALSE))
+    
+  })
+  
+  output$MaximumBet_plot1 <- renderPlot({
+    h1("Results")
+    hist_boxplot(d()[['df']]$MaximumBet,
+                 main = paste("Maximum Bet", " (", input$nsteps, ")", sep = ""),
+                 col = "#75AADB", border = "white",xlab ='Max Bet')
+  })
+  
+  output$EarnedValue_describe1 <- renderTable({
+    t(data.frame(unclass(summary(d()[['df']]$EarnedValue)), 
+                 check.names = FALSE, stringsAsFactors = FALSE))
+    
+  })
+  
+  output$EarnedValue_plot1 <- renderPlot({
+    h1("Results")
+    hist_boxplot(d()[['df']]$EarnedValue,
+                 main = paste("Earned Value", " (", input$nsteps, ")", sep = ""),
+                 col = "#75AADB", border = "white",xlab ='Earned Value')
+  })
+  
+  output$NrBets_describe1 <- renderTable({
+    t(data.frame(unclass(summary(d()[['df']]$NrBets)), 
+                 check.names = FALSE, stringsAsFactors = FALSE))
+    
+  })
+  
+  output$NrBets_plot1 <- renderPlot({
+    h1("Results")
+    hist_boxplot(d()[['df']]$NrBets,
+                 main = paste("Nr Bets", " (", input$nsteps, ")", sep = ""),
+                 col = "#75AADB", border = "white",xlab ='Nr Bets')
+  })
+  
+  
+  output$MaximumMoneyLoss_plot2 <- renderPlot({
+    h1("Results")
+    hist_boxplot(d()[['df']]$MaximumMoneyLoss,
+                 main = paste("Maximum Money Loss", " (", input$nsteps, ")", sep = ""),
+                 col = "#75AADB", border = "white",xlab ='Max Loss')
+  })
+  
+  output$MaximumMoneyWon_describe2 <- renderTable({
+    t(data.frame(unclass(summary(d()[['df']]$MaximumMoneyWon)), 
+                 check.names = FALSE, stringsAsFactors = FALSE))
+    
+  })
+  
+  
+  output$text <- renderText({ input$nsteps })
+  output$text1 <- renderText({ input$nsteps })
+  output$text2 <- renderText({ input$nsteps })
+  output$text3 <- renderText({ input$nsteps })
+  
+  
   output$dto <- renderDataTable({d()[['df']]})
+  
   output$download <- downloadHandler(
     filename = function(){"data_simulation.csv"},
     content = function(fname){
@@ -155,22 +268,6 @@ server <- function(input, output) {
     }
   )
   
-  # Generate a summary of the data ----
-#  output$descrition <- renderText({
-#    "## Objective:
-#The application was designed to simulate bets according to the player's parameters.
-#
-#Betting Strategy:
-#Fibonacci System
-#
-#Parameters:"
-#  })
-  
-  # Generate an HTML table view of the data ----
-  #output$table <- renderTable({
-  #  d()[['df']]
-  #})
-  #
 }
 
 # Create Shiny app ----
