@@ -1,7 +1,6 @@
-library(shiny)
 library(packHV)
-library(plotly)
-setwd('C:\\Users\\Alexandre\\Documents\\github\\fibonacci_system')
+library(shiny)
+library(markovchain)
 source('functions_article.R')
 
 
@@ -133,16 +132,16 @@ ui <- pageWithSidebar(
                              br(),
                             h3('Number of Bets'),
                             br(),
-                            p("First, let's analyze the maximum Loss that is decided by betting N times, that is, at a time within our betting strategy, made one by weight"),
-                            p("Thus, to succeed in the betting strategy, it is necessary to have an amount there is more for loss. This variable can define the risk the person wants to take."),
-                            p("Below we have some statistics of this result and a graph with the distribution."),
+                            p(""),
+                            p(""),
+                            p(""),
                             tableOutput("NrBets_describe1"),
                             plotOutput("NrBets_plot1"),
                               h3('Maximum Money Loss'),
                               br(),
-                              p("First, let's analyze the maximum Loss that is decided by betting N plays, i.e, at a time within our betting strategy, made one by weight"),
-                              p("Thus, to succeed in the betting strategy, it is necessary to have an amount there is more for loss. This variable can define the risk the person wants to take."),
-                              p("Below we have some statistics of this result and a graph with the distribution."),
+                              p(""),
+                              p(""),
+                              p(""),
                               tableOutput("MaximumMoneyLoss_describe2"),
                               plotOutput("MaximumMoneyLoss_plot2"))
                   ),
@@ -160,7 +159,7 @@ server <- function(input, output) {
   
  
   d <- reactive({
-    teste_numerico2(nsteps = input$nsteps,
+    teste_numerico(nsteps = input$nsteps,
                              n_matriz = input$nsteps,
                              prob = input$prob,
                              time_0 = input$t0,
