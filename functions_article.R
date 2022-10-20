@@ -1,11 +1,10 @@
 library(markovchain)
 library(diagram)
-library(compiler)
+library(packHV)
 
+####### FunÃ§Ãµes
 
-####### Funções
-
-## Criação de Fibonaccin Seq
+## CriaÃ§Ã£o de Fibonaccin Seq
 
 fibonacci_seq <- function(nterms,n1 = 1,n2 = 2){
   #print("Fibonacci sequence:")
@@ -25,11 +24,12 @@ fibonacci_seq <- function(nterms,n1 = 1,n2 = 2){
   return(sequencia)
 }
 
-## Criação Matriz de Transação
+## CriaÃ§Ã£o Matriz de TransaÃ§Ã£o
 
 matriz_transacition <- function(nterms, t0 = 1, prob_trans = 0.5){
+  
   if(prob_trans > 1 | nterms < 2 | prob_trans < 0){
-    return(print("Error: parâmetros errados 'nterms' or 'prob_trans' "))
+    return(print("Error: params wrongs nterms or prob_trans "))
   }else{
     nterms <- nterms + t0 - 1
     valor = NULL
@@ -58,11 +58,7 @@ matriz_transacition <- function(nterms, t0 = 1, prob_trans = 0.5){
   return(disc_trans)}
 }
 
-## Criação Objeto 'markovchain'
-
-####### TESTE NUMERICO
-fibonacci_seq <- cmpfun(fibonacci_seq)
-matriz_transacition <- cmpfun(matriz_transacition)
+## CriaÃ§Ã£o Objeto 'markovchain'
 
 teste_numerico <- function(nsteps = 100,
                            n_matriz = 100,
@@ -107,14 +103,14 @@ teste_numerico <- function(nsteps = 100,
       values <- c(time_0,nsteps,nr_win,nr_lost,max(cumsum(valores)), min(cumsum(valores)), 
                   max(resultado),sum(valores))
       df[j,] <- values
-      ## Começo da Aposta
+      ## ComeÃ§o da Aposta
     }  
     colnames(df) <- c('StartingPoint',
                       'NrBets',
                       'NrWins',
                       'NrLost',
-                      'MaximumMoneyLoss',
                       'MaximumMoneyWon',
+                      'MaximumMoneyLoss',
                       'MaximumBet',
                       'EarnedValue')
     lista <- list(df = df)
@@ -178,11 +174,7 @@ teste_numerico <- function(nsteps = 100,
 #                   monte_carlo = 100,
 #                   criterio_parada = 'FALSE',
 #                   spread = 10000)
-teste_numerico2 = cmpfun(teste_numerico, options=setCompilerOptions(optimize=3, suppressAll=T))
 
-#system.time(teste_numerico(nsteps=100000, mc1=100))
-#
-#system.time(teste_numerico2(nsteps=100000, mc1=100))
 
 #aux <- teste_numerico(nsteps = 100,
 #               n_matriz = 100,
