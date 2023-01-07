@@ -100,7 +100,7 @@ teste_numerico <- function(nsteps = 100,
           valores[i] <- resultado[i]*percent_win
         }
       }
-      values <- c(time_0,nsteps,nr_win,nr_lost,max(cumsum(valores)), min(cumsum(valores)), 
+      values <- c(as.numeric(disc_trans@states)[time_0],nsteps,nr_win,nr_lost,max(cumsum(valores)), min(cumsum(valores)), 
                   max(resultado),sum(valores))
       df[j,] <- values
       ## Começo da Aposta
@@ -150,7 +150,7 @@ teste_numerico <- function(nsteps = 100,
       }else{parada = FALSE}
     }
     valor_ganho <- sum(valores)
-    values <- c(time_0, j, nr_win, nr_lost, min(cumsum(valores)), (valor_ganho-time_0)/time_0, valor_ganho)
+    values <- c(as.numeric(disc_trans@states)[time_0], j, nr_win, nr_lost, min(cumsum(valores)), (valor_ganho-time_0)/time_0, valor_ganho)
     df[k,]<- values 
     }
     colnames(df) <- c('StartingPoint',

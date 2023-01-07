@@ -67,12 +67,21 @@ ui <- pageWithSidebar(
 
       tabsetPanel(type = "tabs",
                   tabPanel("Description",
+                           h2("Introduction:"),
+                           p("The following study aims to test the Fibonacci strategy in betting. First, let's give a summary of the Fibonacci sequence. The Fibonacci sequence was created by the Italian mathematician Leonardo 'Fibonacci' in the 13th century."),
+                           p("The idea behind the sequence is pretty simple. The first two terms of the sequence are '1', and '1' and the next ones will be the sum of the previous two values. So the start of the sequence is 1, 1, 2, 3, 5, 8, 13... and so on."),
+                           p("The betting strategy using the Fibonacci sequence would be for betting with only two possible outcomes. For example, the coin result (heads or tails). It can also be the odd or even result of a die. In the case of the Casino, it can be used when betting red or black on a roulette wheel."),
+                           p("To explain how the system works, let's take an example of heads and tails. To start, we'll bet $1, the first element of the Fibonacci sequence. Our bet will be Heads. If the result of the coin is Tails, it means that we lose, then in our next bet we will increase the bet for the next element of the sequence in this case it would be $1."),
+                           p("If the result is heads, that is, we win the bet. So in the next bet we will decrease the bet amount for two previous elements of the sequence. As we have the first element, we continue betting $1, however, if we had bet $5, we would return two elements, so in the next bet we will bet $2 (2, 3, 5). How the Fibonacci System works."),
+                           br(),
                            h2("Objective:"),
-                           p("The application was designed to simulate bets according to the player's parameters."),
+                           p("Our objective will be to verify in which of the scenarios it is possible to win with the strategy and which not. Also, check the risk linked to this strategy."),
+                           p("The application was designed to simulate bets according to the player's parameters. We want the reader/player to be able to make several possible simulations, for example, the probability of winning the bet or the percentage he would win on his own bet, among others."),
+                           p("We also created two stopping criteria and created a simulation of the process, similar to a Monte Carlo idea. At the end, the reader can download the simulation data if it is of interest."),
                            br(),
-                           h2('Betting Strategy:'),
-                           p('Fibonacci System'),
-                           br(),
+                           #h2('Betting Strategy:'),
+                           #p('Fibonacci System'),
+                           #br(),
                            h2('Parameters:'),
                            br(),
                            p("- Start Gambling: Starting point of the bet according to the fibonacci sequence;"),
@@ -86,6 +95,7 @@ ui <- pageWithSidebar(
                            p("Now, if you choose 'After % Profit', we have the following parameters:"),
                            p("- Profit %: Profit percentage based on your initial bet;"),
                            p("- Number repetion of process: If you wanna repeat process, you need put how many times you wanna repeat your simulation."),
+                           br(),
                            h2('Results:'),
                            p("About the results, we will have two analyses. One for 'After N Plays' and one for '% Profit'."),
                            p("In both, we have the number of repetition of the process, that is, we want to calculate the average of the results (Profit and Number of Bets)."),
@@ -98,7 +108,9 @@ ui <- pageWithSidebar(
                     condition = "input.crit == 'true'",
                            
                     h2("Analysis - After N Plays"),
-                           p(""),
+                           p("In this topic, some variables of interest will be seen when the stopping criterion is 'After N Plays'. The most relevant variables are:"),
+                           p("- Earned Value: the value that the player will earn at the end of N plays;"),
+                           p("- Maximum Money Loss: risk that the player is assuming, that is, what will be the maximum that he has to leave provisioned."),
                            br(),
                     h3('Earned Value'),
                     br(),
@@ -129,19 +141,18 @@ ui <- pageWithSidebar(
                   conditionalPanel(
                     condition = "input.crit == 'false'",
                              h2("Analysis - After % Profit"),
+                             p("In this topic, some variables of interest will be seen when the stopping criterion is 'After % Profit'. Unlike the first stop criterion, the gain value is already predefined. In this case, the interest in analyzing will be the number of bets made to reach the profit. In addition, the risk linked to this stop criterion will also be seen."),
                              br(),
                             h3('Number of Bets'),
                             br(),
-                            p(""),
-                            p(""),
-                            p(""),
+                            p("The analysis with the number of moves will tell us on average how many bets the player must place if he wants to make", strong(textOutput("text4",inline = T))," percent profit based on his first bet."),
+                            p("Since your first bet was ", strong(textOutput("text6",inline = T))," unit(s). The average number of bets in this scenario was ", strong(textOutput("text5",inline = T)),"."),
                             tableOutput("NrBets_describe1"),
                             plotOutput("NrBets_plot1"),
                               h3('Maximum Money Loss'),
                               br(),
-                              p(""),
-                              p(""),
-                              p(""),
+                              p("In this topic we will analyze the maximum Loss that is decided by betting, i.e, how much do we have as a 'background' to play."),
+                              p("This variable can define the risk the person wants to take. What it means? It means that if you do not continue betting according to the strategy, you may have a loss based on this statistic, however, if you continue you will have to have this value as your emergency fund."),
                               tableOutput("MaximumMoneyLoss_describe2"),
                               plotOutput("MaximumMoneyLoss_plot2"))
                   ),
@@ -256,7 +267,9 @@ server <- function(input, output) {
   output$text1 <- renderText({ input$nsteps })
   output$text2 <- renderText({ input$nsteps })
   output$text3 <- renderText({ input$nsteps })
-  
+  output$text4 <- renderText({ input$spread })
+  output$text5 <- renderText({ mean(d()[['df']]$NrBets) })
+  output$text6 <- renderText({ min(d()[['df']]$StartingPoint) })
   
   output$dto <- renderDataTable({d()[['df']]})
   
