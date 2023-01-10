@@ -16,7 +16,7 @@ On the other hand, if the result is heads, that is, we win the bet, for the next
 
 Our objective will be to verify in which of the scenarios it is possible to win with the strategy and which not. Also, check the risk linked to this strategy.
 
-The application was designed to simulate bets according to the player's parameters. We want the reader/player to be able to make several possible simulations, for example, the probability of winning the bet or the percentage he would win on his own bet, among others.
+The application was designed to simulate bets according to the player's parameters. We want the reader/player to be able to make several possible simulations, for example, the probability of winning the bet or the percentage they would win on there own bet, among others.
 
 We also created two stopping criteria and created a simulation of the process, similar to a Monte Carlo idea. At the end, the reader can download the simulation data if it is of interest.
 
